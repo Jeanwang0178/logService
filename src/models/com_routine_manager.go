@@ -64,7 +64,6 @@ func (gm GoRoutineManager) stopOther() error {
 	if !ok {
 		return fmt.Errorf("not found goroutine name :" + chanName)
 	}
-	//stopChannel.tails.Done()
 	line := tail.Line{"tailf file done ", time.Now(), nil}
 	stopChannel.tails.Lines <- &line
 	stopChannel.msg <- common.STOP + strconv.Itoa(int(stopChannel.gid))
