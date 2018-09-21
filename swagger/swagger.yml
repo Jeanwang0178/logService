@@ -1,0 +1,12 @@
+swagger: "2.0"
+info: {}
+basePath: /open
+paths:
+  /logFile/startTail:
+    post:
+      tags:
+      - logFile
+  /logFile/stopTail:
+    post:
+      tags:
+      - logFile
