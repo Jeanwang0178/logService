@@ -5,6 +5,13 @@
   },
   "basePath": "/open",
   "paths": {
+    "/logFile/listFile": {
+      "post": {
+        "tags": [
+          "logFile"
+        ]
+      }
+    },
     "/logFile/startTail": {
       "post": {
         "tags": [

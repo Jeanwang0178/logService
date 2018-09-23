@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/websocket"
 	"logService/src/common"
 	"logService/src/services"
+	"logService/src/utils"
 )
 
 type LogFileController struct {
@@ -44,4 +45,29 @@ func (ctl *LogFileController) StopTail() {
 		common.Logger.Error("missing param chanName ")
 	}
 
+}
+
+// @router /listFile [post]
+func (ctl *LogFileController) ListFile() {
+
+	bodyMap := make(map[string]interface{})
+	json.Unmarshal(ctl.Ctx.Input.RequestBody, &bodyMap)
+
+	response := make(map[string]interface{})
+	if bodyMap["foldPath"] != nil {
+		foldPath := bodyMap["foldPath"].(string)
+		fileNames, err := utils.ListFile(foldPath)
+		if err != nil {
+			response["code"] = utils.FailedCode
+			response["msg"] = err.Error()
+		} else {
+			response["code"] = utils.SuccessCode
+			response["msg"] = utils.SuccessMsg
+			response["data"] = fileNames
+		}
+		ctl.Data["json"] = response
+	} else {
+		common.Logger.Error("missing param chanName ")
+	}
+	ctl.ServeJSON()
 }
