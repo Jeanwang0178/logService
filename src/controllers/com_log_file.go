@@ -19,14 +19,15 @@ func (ctl *LogFileController) StartTail() {
 	bodyMap := make(map[string]interface{})
 	json.Unmarshal(ctl.Ctx.Input.RequestBody, &bodyMap)
 
-	if bodyMap["filePath"] == nil || bodyMap["chanName"] == nil {
-		common.Logger.Error("missing param filePath || %v ,chanName || %v ", bodyMap["filePath"], bodyMap["chanName"])
+	if bodyMap["filePath"] == nil || bodyMap["chanName"] == nil || bodyMap["msgKey"] == nil {
+		common.Logger.Error("missing param filePath || %v ,chanName || %v ,msgKey || %v ", bodyMap["filePath"], bodyMap["chanName"], bodyMap["msgKey"])
 		return
 	}
 	filePath := bodyMap["filePath"].(string)
 	chanName := bodyMap["chanName"].(string)
+	msgKey := bodyMap["msgKey"].(string)
 
-	services.LogFileServiceViewFile(chanName, filePath)
+	services.LogFileServiceViewFile(chanName, filePath, msgKey)
 
 }
 

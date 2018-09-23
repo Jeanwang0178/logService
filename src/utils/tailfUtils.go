@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"github.com/hpcloud/tail"
-	"logService/src/common"
 	"logService/src/models"
 )
 
@@ -12,7 +10,7 @@ var (
 
 func TailfFiles(gm *models.GoRoutineManager) {
 
-	fileName := "C:\\data\\logs\\sinochem-oms.log"
+	/*fileName := "C:\\data\\logs\\sinochem-oms.log"
 	tails, err := tail.TailFile(fileName, tail.Config{
 		ReOpen: true,
 		Follow: true,
@@ -26,6 +24,6 @@ func TailfFiles(gm *models.GoRoutineManager) {
 	}
 
 	gm.NewLoopGoroutine("", tails)
-
+	*/
 	return
 }

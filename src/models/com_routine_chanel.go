@@ -30,10 +30,10 @@ func (m *GoroutineChannelMap) unregister(name string) error {
 	return nil
 }
 
-func (m *GoroutineChannelMap) register(name string, tails tail.Tail) (chanName string, err error) {
+func (m *GoroutineChannelMap) register(chanKey string, tails tail.Tail) (chanName string, err error) {
 	gchannel := &GoroutineChannel{
 		gid:   uint64(rand.Int63()),
-		name:  name,
+		name:  chanKey,
 		tails: tails,
 	}
 	gchannel.msg = make(chan string)
@@ -44,9 +44,8 @@ func (m *GoroutineChannelMap) register(name string, tails tail.Tail) (chanName s
 	} else if _, ok := m.grchannels[gchannel.name]; ok {
 		return "", fmt.Errorf("go routine channel already defined : %q ", gchannel.name)
 	}
-	common.SetCache(gchannel.name, gchannel.name+"_"+string(gchannel.gid), 1000000)
 
-	m.grchannels[gchannel.name+"_"+string(gchannel.gid)] = gchannel
-	common.Logger.Info("register chanName :" + gchannel.name + "_" + string(gchannel.gid))
-	return gchannel.name + "_" + string(gchannel.gid), nil
+	m.grchannels[gchannel.name] = gchannel
+	common.Logger.Info("register chanName :" + gchannel.name)
+	return gchannel.name, nil
 }

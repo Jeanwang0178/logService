@@ -8,10 +8,10 @@ import (
 /**
  * 1、tailf file文件  2、发送 kafka 3、页面建立webSocket连接 4、监听kafka消息队列，推送页面
  */
-func LogFileServiceViewFile(chanName string, filePath string) {
+func LogFileServiceViewFile(chanKey string, filePath string, msgKey string) {
 
 	gm := models.NewGoRoutineManager()
-	go gm.TailfFiles(chanName, filePath)
+	go gm.TailfFiles(chanKey, filePath, msgKey)
 
 }
 

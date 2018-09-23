@@ -46,15 +46,16 @@ func initProduce() (err error) {
 	return err
 }
 
-func SendToKafka(data, topic string) (err error) {
+func SendToKafka(msgKey, data string) (err error) {
 
 	msg := &sarama.ProducerMessage{}
-	msg.Topic = topic
+	msg.Topic = common.TopicLog
 	msg.Value = sarama.StringEncoder(data)
+	msg.Key = sarama.StringEncoder(msgKey)
 
 	pid, offset, err := produce.SendMessage(msg)
 	if err != nil {
-		logs.Error("send message failed, err:%v pid:%v offset:%v data:%v topic:%v", err, pid, offset, data, topic)
+		logs.Error("send message failed, err:%v pid:%v offset:%v data:%v msgKey:%v", err, pid, offset, data, msgKey)
 		return
 	}
 

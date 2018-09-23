@@ -33,14 +33,8 @@ func NewGoRoutineManager() *GoRoutineManager {
 }
 
 func (gm GoRoutineManager) StopLoopGoroutine(chanName string) error {
-	gm.stopOther()
-	cacheKey := *new(string)
-	common.GetCache(chanName, &cacheKey)
-	if cacheKey == "" {
-		common.Logger.Error("get cache failed %s ", chanName)
-		return fmt.Errorf("get cache failed :" + chanName)
-	}
-	stopChannel, ok := gm.grchannelMap.grchannels[cacheKey]
+
+	stopChannel, ok := gm.grchannelMap.grchannels[chanName]
 	if !ok {
 		return fmt.Errorf("not found goroutine name :" + chanName)
 	}
@@ -48,32 +42,14 @@ func (gm GoRoutineManager) StopLoopGoroutine(chanName string) error {
 	line := tail.Line{"tailf file done ", time.Now(), nil}
 	stopChannel.tails.Lines <- &line
 	stopChannel.msg <- common.STOP + strconv.Itoa(int(stopChannel.gid))
-
 	return nil
 }
 
-func (gm GoRoutineManager) stopOther() error {
-	chanName := "4ec3bd45493b4f378630ae630bd579f6"
-	cacheKey := *new(string)
-	common.GetCache(chanName, &cacheKey)
-	if cacheKey == "" {
-		common.Logger.Error("get cache failed %s ", chanName)
-		return fmt.Errorf("get cache failed :" + chanName)
-	}
-	stopChannel, ok := gm.grchannelMap.grchannels[cacheKey]
-	if !ok {
-		return fmt.Errorf("not found goroutine name :" + chanName)
-	}
-	line := tail.Line{"tailf file done ", time.Now(), nil}
-	stopChannel.tails.Lines <- &line
-	stopChannel.msg <- common.STOP + strconv.Itoa(int(stopChannel.gid))
-	return nil
-}
-func (gm *GoRoutineManager) NewLoopGoroutine(name string, tails *tail.Tail) {
+func (gm *GoRoutineManager) NewLoopGoroutine(chanKey string, tails *tail.Tail, msgKey string) {
 
-	go func(this *GoRoutineManager, name string, tails tail.Tail) {
+	go func(this *GoRoutineManager, chanKey string, tails tail.Tail, msgKey string) {
 		//register channel
-		chanName, err := gm.grchannelMap.register(name, tails)
+		chanName, err := gm.grchannelMap.register(chanKey, tails)
 		if err != nil {
 			common.Logger.Error("grchannelMap.register failed %v ", err)
 			return
@@ -88,7 +64,7 @@ func (gm *GoRoutineManager) NewLoopGoroutine(name string, tails *tail.Tail) {
 
 						common.Logger.Info(chanName + "：gid[" + gid + "] quit")
 						this.grchannelMap.unregister(chanName)
-						common.DeleteCache(name)
+						common.DeleteCache(chanKey)
 						return
 					} else {
 						common.Logger.Info("unknow signal")
@@ -105,16 +81,16 @@ func (gm *GoRoutineManager) NewLoopGoroutine(name string, tails *tail.Tail) {
 				time.Sleep(100 * time.Millisecond)
 				return
 			}
-			err = SendToKafka(msg.Text, common.TopicLog)
+			err = SendToKafka(msgKey, msg.Text)
 			if err != nil {
 				common.Logger.Error("taild file error : %v ", err)
 			}
 
 		}
-	}(gm, name, *tails)
+	}(gm, chanKey, *tails, msgKey)
 }
 
-func (gm *GoRoutineManager) TailfFiles(chanName string, filePath string) (err error) {
+func (gm *GoRoutineManager) TailfFiles(chanKey string, filePath string, msgKey string) (err error) {
 
 	tails, err := tail.TailFile(filePath, tail.Config{
 		ReOpen: true,
@@ -128,7 +104,7 @@ func (gm *GoRoutineManager) TailfFiles(chanName string, filePath string) (err er
 		common.Logger.Error("taild file error : %v ", err)
 		return err
 	}
-	gm.NewLoopGoroutine(chanName, tails)
+	gm.NewLoopGoroutine(chanKey, tails, msgKey)
 
 	return nil
 }
